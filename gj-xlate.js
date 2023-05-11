@@ -8,7 +8,7 @@ function scrub_extras(description) {
 
 function render_point(feature) {
     return [
-        feature.geometry.coordinates.join(","),
+        feature.geometry.coordinates.toReversed().join(","),
         feature.properties.title,
         scrub_extras(feature.properties.description)
         //,
@@ -21,7 +21,7 @@ function render_point(feature) {
 
 function render_polygon(feature) {
     return [
-        feature.geometry.coordinates[0].map( e => e.join(",") ).join(":"),
+        feature.geometry.coordinates[0].map( e => e.toReversed().join(",") ).join(":"),
         feature.properties.title,
         scrub_extras(feature.properties.description)
         //, green   // border color
@@ -35,7 +35,7 @@ function render_polygon(feature) {
 
 function render_line(feature) {
     return [
-        feature.geometry.coordinates[0].map( e => e.join(",") ).join(":"),
+        feature.geometry.coordinates[0].map( e => e.toReversed().join(",") ).join(":"),
         feature.properties.title,
         scrub_extras(feature.properties.description)
         //, red     // line color
@@ -44,8 +44,9 @@ function render_line(feature) {
     ].concat(get_extras(feature.properties.description)).join("~");
 }
 
-function xlategj() {
-    g=JSON.parse(document.querySelector("textarea#wpTextbox1").value);
+// translate to leaflet layout
+function gj_xlate(raw_geojson) {
+    g=JSON.parse(raw_geojson);
     const buckets = new Map();
     for (const feature of g.features) {
         const type = feature.geometry.type;
@@ -64,5 +65,5 @@ function xlategj() {
     if (buckets.has("Line")) {
         sections.push( "lines=" + buckets.get("Polygon").map( e => render_polygon(e) ).join(";\n") );
     }
-    alert(sections.join("\n| "));
+    return sections.map( e => "| " + e).join("\n");
 }
