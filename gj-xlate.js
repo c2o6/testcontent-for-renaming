@@ -1,14 +1,3 @@
-g=JSON.parse(document.querySelector("textarea#wpTextbox1").value);
-
-buckets = new Map();
-for (const feature of g.features) {
-    const type = feature.geometry.type;
-    if ( ! buckets.has(type) ) {
-        buckets.set(type, []);
-    }
-    buckets.get(type).push(feature);
-}
-
 function get_extras(description) {
     return [];
 }
@@ -54,14 +43,26 @@ function render_line(feature) {
         //, 4       // line thickness
     ].concat(get_extras(feature.properties.description)).join("~");
 }
-sections = [];
-if (buckets.has("Point")) {
-    sections.push( buckets.get("Point").map( e => render_point(e) ).join(";\n") );
+
+function xlategj() {
+    g=JSON.parse(document.querySelector("textarea#wpTextbox1").value);
+    const buckets = new Map();
+    for (const feature of g.features) {
+        const type = feature.geometry.type;
+        if ( ! buckets.has(type) ) {
+            buckets.set(type, []);
+        }
+        buckets.get(type).push(feature);
+    }
+    const sections = [];
+    if (buckets.has("Point")) {
+        sections.push( buckets.get("Point").map( e => render_point(e) ).join(";\n") );
+    }
+    if (buckets.has("Polygon")) {
+        sections.push( "polygons=" + buckets.get("Polygon").map( e =>render_polygon(e) ).join(";\n") );
+    }
+    if (buckets.has("Line")) {
+        sections.push( "lines=" + buckets.get("Polygon").map( e => render_polygon(e) ).join(";\n") );
+    }
+    alert(sections.join("\n| "));
 }
-if (buckets.has("Polygon")) {
-    sections.push( "polygons=" + buckets.get("Polygon").map( e =>render_polygon(e) ).join(";\n") );
-}
-if (buckets.has("Line")) {
-    sections.push( "lines=" + buckets.get("Polygon").map( e => render_polygon(e) ).join(";\n") );
-}
-alert(sections.join("\n| "));
